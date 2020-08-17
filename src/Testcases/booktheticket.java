@@ -26,64 +26,65 @@ public class booktheticket extends baseclass {
 
 	@Test
 	public void ticketbooking() throws InterruptedException {
-       
-		Scanner sc = new Scanner(System.in);
-		
-		JavascriptExecutor je = (JavascriptExecutor) driver;	
-	
 
-		
+		Scanner scanner = new Scanner(System.in);
+
+		JavascriptExecutor je = (JavascriptExecutor) driver;	
+		WebDriverWait wait = new WebDriverWait(driver, 5);
+
+
+		//first page
 		signIn sn  = new signIn(driver);
-		
-		List<WebElement> iframeElements = driver.findElements(By.tagName("iframe"));
-		System.out.println("Total number of iframes are " + iframeElements.size());
-		
-		
-		
-		 /*sn.buttonsigin().click(); 
-		  * WebElement myframe =	driver.findElement(By.xpath("/html/body/div[1]/div/div[1]/div/div[1]/div[2]/div/div/iframe"));
-     	//driver.switchTo().frame(myframe);
-     	Thread.sleep(3000);
-     	je.executeScript("arguments[0].click()", myframe);*/
-		
-		WebDriverWait wait = new WebDriverWait(driver, 10);
-		wait.until(ExpectedConditions.elementToBeClickable(By.partialLinkText("Sign In"))).click();
+
+
+		wait.until(ExpectedConditions.elementToBeClickable(sn.buttonsigin())).click();
 
 		//switch to popup iframe to enter login credentials into form
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("authiframe"));
-		
-		System.out.println("Enter Mobile Number");
-     	driver.findElement(By.xpath("//*[@id='authMobile']")).sendKeys("9705664547");
-		
-		
-  
-		sn.continuebutton().click();
-		
-		wait.until(ExpectedConditions.elementToBeClickable(By.partialLinkText("Continue"))).click();
-		//close button
-		driver.findElement(By.xpath("//*[@id='authOverlay']/div/a")).click();
-		
-		System.out.println(" OTP");
-		String otp = sc.next();
-		//sn.enterotp().sendKeys("0093");
-		Thread.sleep(1000);
-		driver.findElement(By.xpath("//*[@class='userDetailBlk']/div/input[@id='otp_index0']")).sendKeys("3");
-		driver.findElement(By.xpath("//*[@class='userDetailBlk']/div/input[@id='otp_index1']")).sendKeys("2");
-		driver.findElement(By.xpath("//*[@class='userDetailBlk']/div/input[@id='otp_index2']")).sendKeys("8");
-		driver.findElement(By.xpath("//*[@class='userDetailBlk']/div/input[@id='otp_index3']")).sendKeys("2");
-		
-		sn.againcontinuebuttons().click(); // finally continue
-		
-		// child to parent frame work
-		driver.switchTo().defaultContent(); 
-		//FirstPage		
 
-		Loginpage lp = new Loginpage(driver);
-		
-     	//source calendar date	
+		System.out.println("Enter Mobile Number");
+		String mobilenumber = scanner.next();
+		sn.RegisterNumber().sendKeys(mobilenumber);
+
+
+		sn.continuebutton().click();//close button
+
+
+
+
+		System.out.println(" Enter 1 Digit in OTP");
+
+		String first = scanner.next();
+		wait.until(ExpectedConditions.elementToBeClickable(sn.firstotps() )).sendKeys(first);	
+
+		System.out.println("Enter 2 Digit in OTP");
+		String second = scanner.next();
+		wait.until(ExpectedConditions.elementToBeClickable(sn.secondotps())).sendKeys(second);
+		System.out.println("Enter 3 Digit in OTP");
+		String third = scanner.next();
+		wait.until(ExpectedConditions.elementToBeClickable(sn.thirdotps())).sendKeys(third);
+		System.out.println("Enter 4 Digit in OTP");
+		String fourth = scanner.next();
+		wait.until(ExpectedConditions.elementToBeClickable(sn.fourthotps())).sendKeys(fourth);
+
+
+		sn.againcontinuebuttons().click(); // finally continue
+
+		driver.switchTo().defaultContent(); //back to parent class
+
+
+
+		// Source - Destination Searching 
+
+		Loginpage lp = new Loginpage(driver); 
+
+		Thread.sleep(2000);
+		//source calendar date	
 		String mnths="November 2020";
 		String reqdates="25";
-		lp.calendarpath().click();
+
+		lp.calendarpath().click(); // depature path
+
 		while(!lp.monthsyearstext().getText().equalsIgnoreCase(mnths)){
 			lp.serachbutton().click();
 		}
@@ -126,22 +127,28 @@ public class booktheticket extends baseclass {
 			}
 		}
 
-		// source place
-		
-				lp.sourceplace().sendKeys("Mumbai");
-				Thread.sleep(2000);
-				lp.sourceplace().sendKeys( Keys.ARROW_DOWN );
-				lp.sourceplace().sendKeys(Keys.ENTER);
-				
 
-				//Destination place
-			
-				lp.destinationplace().sendKeys("Delhi");
-				Thread.sleep(3000);
-				lp.destinationplace().sendKeys( Keys.ARROW_DOWN );
-			    lp.destinationplace().sendKeys(Keys.ENTER);
-	// search button
-		//JavascriptExecutor je = (JavascriptExecutor) driver;	
+
+
+		lp.sourceplace().sendKeys("Mumbai");
+		Thread.sleep(2000);
+		lp.sourceplace().sendKeys( Keys.ARROW_DOWN );
+		lp.sourceplace().sendKeys(Keys.ENTER);
+
+
+		//Destination place
+
+		WebElement elem = lp.destinationplace();
+
+		((JavascriptExecutor)driver).executeScript("arguments[0].style.border='3px solid red'", elem);
+
+		lp.destinationplace().sendKeys("Delhi");
+		Thread.sleep(3000);
+		lp.destinationplace().sendKeys( Keys.ARROW_DOWN );
+		lp.destinationplace().sendKeys(Keys.ENTER);
+
+
+		// click on search button
 		WebElement button = lp.submit();
 		je.executeScript("arguments[0].click()", button);
 
@@ -150,14 +157,16 @@ public class booktheticket extends baseclass {
 
 
 		// page-2
+
+
 		flightslists fs = new flightslists(driver);
 
-		
+
 		WebElement par = fs.prices();
 		Actions ac = new Actions(driver);
 		ac.doubleClick(par).build().perform();
 
-	
+
 		List<WebElement>details= fs.costofflights();
 		int n = details.size()- (details.size()-1);
 		System.out.println("no of flights selecte="+ n);
@@ -183,19 +192,21 @@ public class booktheticket extends baseclass {
 		for(int i=0; i<nr;i++) {
 
 			System.out.println("return prices="+returndetails.get(i).getText());
-		
-			fs.returnflightradiobuttons().click(); 	// its select the fitst radio button
-		   }	
 
+			fs.returnflightradiobuttons().click(); 	// its select the fitst radio button
+		}	
+
+		je.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+		Thread.sleep(1000);
 
 		//final total amount
 		fs.finalamount().click();		
 
-
+		Thread.sleep(3000);
 
 		System.out.println("-----page-3-------");
 
-		/*Scanner scanner = new Scanner(System.in);
+		/*//Scanner scanner = new Scanner(System.in);
 		System.out.println("—title- Mr/Mrs --");
 		String titlename = scanner.next();
 		System.out.println("—first name --");
@@ -209,7 +220,7 @@ public class booktheticket extends baseclass {
 		System.out.println("—Email id  --");
 		String email = scanner.next();*/
 
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
 
 
 		String titlename = "Mr";
@@ -225,18 +236,35 @@ public class booktheticket extends baseclass {
 		String email = "shaikmyneer438@gmail.com";		
 
 
+
+		je.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+		Thread.sleep(1000);
+
 		Ticketdetailspage psd = new Ticketdetailspage(driver);
-		WebElement title1 = psd.title() ;
+
+
+
+		WebDriverWait wait3 = new WebDriverWait(driver,30);
+		je.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+		Thread.sleep(2000);
+
+		je.executeScript("document.getElementsByName('AdultmiddleName1').value='basha';");
+
+		//psd.middlenames().sendKeys(middlename); 
+
+		WebElement title1 = wait3.until(ExpectedConditions.elementToBeClickable(psd.title()));
 		Select sel = new Select(title1);
 		sel.selectByVisibleText(titlename);	
 
-		psd.firstnames().sendKeys(firstname); 
-		psd.middlenames().sendKeys(middlename); 		
+		wait3.until(ExpectedConditions.elementToBeClickable(psd.firstnames())).sendKeys(firstname);
+
+
+
 		psd.lastname().sendKeys(lastname); 
 		psd.emails().sendKeys(email);	    
 		psd.mobilenumbers().sendKeys(number);  
 
-		psd.travelprocedbuttons();
+		wait3.until(ExpectedConditions.elementToBeClickable(psd.travelprocedbuttons())).click();//procedbutton
 
 
 
